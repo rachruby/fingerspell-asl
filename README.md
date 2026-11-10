@@ -4,9 +4,12 @@ Recognizes the ASL manual alphabet live from a webcam. MediaPipe finds 21 hand
 landmarks per frame, a small PyTorch classifier maps them to a letter, and a
 temporal decoder turns the per-frame guesses into typed text.
 
-Why I built it: fingerspelling is one small part of ASL, used mainly for
-names and words without a sign of their own. As I continue to explore the ASL course, I hope building a project that recognizes isolated
-static handshapes helps with my understanding. 
+**Why I built it:** I'm taking an ASL course, and building a recognizer for
+the manual alphabet is helping me understand handshapes more precisely.
+Fingerspelling is one small part of ASL, used mainly for names and words
+without a sign of their own. This project recognizes isolated static
+handshapes; it is not sign language recognition or translation.
+
 
 ## Architecture
 
@@ -143,16 +146,33 @@ doubles.
 - One hand, facing the camera. No handling of the signer's viewpoint versus the viewer's.
 - Handedness comes from MediaPipe's label, which is sometimes wrong, and a wrong label mirrors the hand.
 
-## Demo Results
+## Results
 
-- The test-split accuracy next to the new-signer accuracy, and the gap between them.
-- The confusion matrix and the three or four worst letter pairs, with a guess at why.
-- Per-class hand detection rate from `validate.py`: which letters MediaPipe misses most.
-- What you would do with another week: sequence model for J/Z and coarticulation, more signers, a signer-independent benchmark.
+Trained on 600 images per class from the Kaggle ASL Alphabet dataset.
 
-## The journey of working on this included 
+| Metric | Value |
 |---|---|
-| Supporting data collection | `collect.py`: recording protocol, signer ids, burst grouping |
+| Hand detection rate (MediaPipe) | 79.6% of 16,800 images |
+| Test accuracy, dataset's signer | 95.7% (1,910 held-out samples) |
+| Macro-F1 | 95.4% |
+| End to end (detection × classification) | about 76% |
+
+**Detection varies by letter.** F was found in 96.7% of images and N in only
+50.2%. The closed-fist letters M and N are the hardest for MediaPipe because
+the fingers hide each other.
+
+
+**Accuracy on other signers has not been measured yet.** A first spot check on
+my own signing suggests recording my own data and retraining is the next step.
+
+**Next:** a held-out test on my own signing, a sequence model for J and Z, and
+data from more signers.
+
+## What working on this involved
+
+| Area | Where it lives |
+|---|---|
+| Data collection | `collect.py`: recording protocol, signer ids, burst grouping |
 | Annotating and validating data | `validate.py`: QA report, outlier review list, detection-failure log |
 | Training models and running experiments | `train.py`, `evaluate.py`, held-out-signer experiment |
 | Building tools and scripts | One shared data format, CLI per stage, tests |
@@ -174,6 +194,11 @@ Every stage of the pipeline was run end to end:
 - **Live demo and data collection:** `live.py` and `collect.py` ran on a
   webcam and recorded landmark data. (work in-progress for a demo mp4 soon!!!)
 
+- **How it helps me practice ASL:** the live view draws the tracked hand
+  skeleton over my hand and shows which letter the model reads, so I can see
+  my handshape from the viewer's side and adjust it as I practice
+  fingerspelling.
+  
 These accuracy figures are for the dataset's single signer, on images where a
 hand was detected. Combining detection and classification, roughly 76% of
 dataset images are recognized correctly end to end.
