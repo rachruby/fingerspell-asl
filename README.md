@@ -62,7 +62,7 @@ handshapes; it is not sign language recognition or translation.
 | `fingerspell/live.py` | Webcam demo with on-screen text and video recording. |
 | `fingerspell/synthetic.py` | Fake data for testing the pipeline without a camera. |
 
-## Setup
+## Setup (for people who are cloning the repo)
 
 ```bash
 python -m venv .venv && source .venv/bin/activate
@@ -94,19 +94,17 @@ python -m fingerspell.train --data data/processed/kaggle.npz --out runs/kaggle
 python -m fingerspell.evaluate --run runs/kaggle
 ```
 
-**4. Record yourself and test on a signer the model has not seen.**
+**4. Record yourself twice: once for training, once for testing.**
 
-```bash
-python -m fingerspell.collect --signer me --out data/collected/me.npz
-python -m fingerspell.evaluate --run runs/kaggle --data data/collected/me.npz --name me
-```
+    python -m fingerspell.collect --signer me --out data/collected/me_train.npz
+    python -m fingerspell.collect --signer me --out data/collected/me_test.npz
+    python -m fingerspell.evaluate --run runs/kaggle --data data/collected/me_test.npz --name before
 
-**5. Add your data to training, then run the demo.**
+**5. Add your training recording, retrain, and compare on the test recording.**
 
-```bash
-python -m fingerspell.train --data data/processed/kaggle.npz data/collected/me.npz --out runs/combined
-python -m fingerspell.live --run runs/combined --record demo.mp4
-```
+    python -m fingerspell.train --data data/processed/kaggle.npz data/collected/me_train.npz --out runs/combined
+    python -m fingerspell.evaluate --run runs/combined --data data/collected/me_test.npz --name after
+    python -m fingerspell.live --run runs/combined --record demo.mp4
 
 ## Design decisions
 
